@@ -1,0 +1,119 @@
+#!/usr/bin/python
+
+import string, re, struct, sys, math, os, time
+import numpy
+import subprocess
+#import datetime
+#from pylab import *
+from sys import argv
+############################################################
+def get_run_max():
+        data_runmax=open('current_state_simulation_b.dat', 'r')
+        lines_file = data_runmax.readlines()
+        dict_runmax={}
+        for line in lines_file:
+                dict_runmax[line.split('\t')[0]]=int(line.split('\t')[1])-1
+        data_runmax.close()
+        return dict_runmax;
+
+
+dict_runmax=get_run_max()
+
+#Irta Paths
+#common_parent_path='/data_prace/michele/prace/cdc'
+#base_dir_script=common_parent_path+'/analysis/plots/plot_low_level_scripts'
+#base_dir_plot_storage=common_parent_path+'/analysis/plots/pdf_files'
+#base_dir_results=common_parent_path+'/analysis/results/'
+
+#latitude Paths
+common_parent_path='/dos/Google_Drive/UNI_magistrale/2_anno/2_semestre_tesi/postprocessing'
+base_dir_results=common_parent_path+'/results'
+base_dir_script=common_parent_path+'/plots/plot_low_level_scripts'
+base_dir_plot_storage=common_parent_path+'/plots/pdf_files'
+
+
+'''
+FULL LIST OF PLOTS SCRIPTS.
+Select the script to lauch from this list:
+
+/4_plot_CordNum_all.py
+'''
+script_name='/4_plot_CordNum_PDF_NEW.py' #extracts only the name of the script
+
+#put in this list all the paths in which you want to launch script[i]
+
+'''
+FULL LIST OF DATA FOLDERS IN EACH OF THE PATHS ABOVE
+/1_density_results
+/2_convert_position2VMD_results
+/3_RDF_results
+/4_coord_num_results
+/5_charge_results	
+'''
+data_path='/4_coord_num_results_31-05_best'
+#'/4_coord_num_results'
+
+
+'''
+FULL LIST OF PATHS ROOTS. 
+'/cdc1200/nacl/8800_160/0.0V', 
+'/cdc1200/nacl/8800_160/1.0V', 
+'/cdc1200/nacl/8800_80/0.0V',
+'/cdc1200/nacl/8800_80/1.0V',
+'/cdc1200/kcl/8800_160/0.0V',
+'/cdc1200/kcl/8800_160/1.0V',
+'/cdc1200/kcl/8800_80/0.0V',
+'/cdc1200/kcl/8800_80/1.0V',
+
+'/cdc800/nacl/7615_139/0.0V',
+'/cdc800/nacl/7615_139/1.0V',
+'/cdc800/nacl/7700_70/0.0V',
+'/cdc800/nacl/7700_70/1.0V',
+'/cdc800/kcl/7615_139/0.0V',
+'/cdc800/kcl/7615_139/1.0V',
+'/cdc800/kcl/7700_70/0.0V',
+'/cdc800/kcl/7700_70/1.0V'
+'''
+
+paths_to_launch=[
+'/cdc1200/nacl/8800_160/0.0V', 
+'/cdc1200/nacl/8800_160/1.0V', 
+'/cdc1200/nacl/8800_80/0.0V',
+'/cdc1200/nacl/8800_80/1.0V',
+'/cdc800/nacl/7615_139/0.0V',
+'/cdc800/nacl/7615_139/1.0V',
+'/cdc800/nacl/7700_70/0.0V',
+'/cdc800/nacl/7700_70/1.0V',
+'/cdc1200/kcl/8800_160/0.0V',
+'/cdc1200/kcl/8800_160/1.0V',
+'/cdc1200/kcl/8800_80/0.0V',
+'/cdc1200/kcl/8800_80/1.0V'
+]
+
+#copy the script in the folder where it must be executed
+for target_path in paths_to_launch:
+        cmd='cp '+base_dir_script+script_name+' '+base_dir_results+target_path+data_path
+        #nprint cmd
+        os.system(cmd)
+
+proc_id=[]
+pid_list=[]
+indx_buf=0
+for target_path in paths_to_launch:
+        dir_to_go=base_dir_results+target_path+data_path
+        print 'cd ', dir_to_go
+        os.chdir(dir_to_go)
+        cmd = 'python '+script_name[1:]
+        #print cmd
+        os.system(cmd)
+
+#transfer data to the proper directory and clean tmp direatories
+for target_path in paths_to_launch:
+        #create the path if not present!
+        store_path=base_dir_plot_storage+target_path
+        cmd='mkdir -p '+store_path
+        os.system(cmd)
+
+        cmd='mv '+base_dir_results+target_path+data_path+'/*.pdf '+store_path
+        #print cmd
+        os.system(cmd)
